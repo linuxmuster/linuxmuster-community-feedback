@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+#  linuxmuster-community-feedback
+#  Frank Schiebel <frank@linuxmuster.net>
+#  11.03.2014 - GPLv2
+#
+
+# Source feedback config
+. /etc/linuxmuster/community-feedback.conf
+
+# Source network settings
+. /var/lib/linuxmuster/network.settings
+
+# calculate system id from mac of eth0, schoolname an domainname
+MAC=$(ifconfig eth0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')
+STRINGTOHASH=${MAC}${schoolname}${domainname}
+SYSTEMID=$(echo -n $STRINGTOHASH | md5sum - | awk '{print $1}')
+
+# determine statsfile
+STATSFILE=/var/cache/linuxmuster/feedback-$SYSTEMID.txt
+
+# get linuxmuster.net version from /etc/issue
+ISSUEVERSION=$(cat /etc/issue | awk '{print $2}')
+# get version of linuxmuster-base
+BASEVERSION=$(dpkg -l linuxmuster-base | grep ^ii | awk '{print $3}')
+
+# output basic statsinformation
+echo "id=$SYSTEMID" > $STATSFILE
+echo "issueversion=$ISSUEVERSION" >> $STATSFILE
+echo "baseversion=$BASEVERSION" >> $STATSFILE
+
+if [ $numusers -eq 1 ]; then
+    SCHUELERTXTUSERS=$(wc -l /etc/sophomorix/user/schueler.txt | awk '{print $1}')
+    LEHRERTXTUSERS=$(wc -l /etc/sophomorix/user/lehrer.txt | awk '{print $1}')
+    echo "students=$SCHUELERTXTUSERS" >> $STATSFILE
+    echo "teachers=$LEHRERTXTUSERS" >> $STATSFILE
+fi
+
+if [ $numclients -eq 1 ]; then
+    echo ""
+fi
+
