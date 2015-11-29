@@ -20,23 +20,38 @@ if [ ! -e $CONFIGFILE ]; then
 fi
 
 db_get linuxmuster-community-feedback/sendstats
-
-echo "RET $RET"
+db_input high linuxmuster-community-feedback/sendstats || true
+db_go
 if [ "$RET" ]; then
     SENDSTATS=$RET;
+    
 fi
 
+db_get linuxmuster-community-feedback/virtualized
+db_input high linuxmuster-community-feedback/virtualized || true
+db_go
+if [ "$RET" ]; then
+    VIRTUALIZED=$RET;
+fi
+
+
 db_get linuxmuster-community-feedback/sendusers
+db_input high linuxmuster-community-feedback/sendusers || true
+db_go
 if [ "$RET" ]; then
     SENDUSERS=$RET;
 fi
 
 db_get linuxmuster-community-feedback/sendclients
+db_input high linuxmuster-community-feedback/sendclients || true
+db_go
 if [ "$RET" ]; then
     SENDCLIENTS=$RET;
 fi
 
 db_get linuxmuster-community-feedback/sendlocation
+db_input high linuxmuster-community-feedback/sendlocation || true
+db_go
 if [ "$RET" ]; then
     SENDLOCATION=$RET;
 fi
@@ -50,6 +65,8 @@ test -z "$SENDCLIENTS" || grep -Eq '^ *SENDCLIENTS=' $CONFIGFILE || \
             echo "SENDCLIENTS=" >> $CONFIGFILE
 test -z "$SENDLOCATION" || grep -Eq '^ *SENDLOCATION=' $CONFIGFILE || \
             echo "SENDLOCATION=" >> $CONFIGFILE
+test -z "$VIRTUALIZED" || grep -Eq '^ *VIRTUALIZED=' $CONFIGFILE || \
+            echo "VIRTUALIZED=" >> $CONFIGFILE
 
 # write config
 cp -a -f $CONFIGFILE $CONFIGFILE.tmp
@@ -57,12 +74,9 @@ sed -e "s/^ *SENDSTATS=.*/SENDSTATS=\"$SENDSTATS\"/" \
     -e "s/^ *SENDUSERS=.*/SENDUSERS=\"$SENDUSERS\"/" \
     -e "s/^ *SENDCLIENTS=.*/SENDCLIENTS=\"$SENDCLIENTS\"/" \
     -e "s/^ *SENDLOCATION=.*/SENDLOCATION=\"$SENDLOCATION\"/" \
+    -e "s/^ *VIRTUALIZED=.*/VIRTUALIZED=\"$VIRTUALIZED\"/" \
     < $CONFIGFILE > $CONFIGFILE.tmp
 mv -f $CONFIGFILE.tmp $CONFIGFILE
-
-if [ $debug ]; then
-    echo "Debug:"
-fi
 
 # dh_installdeb will replace this with shell code automatically
 

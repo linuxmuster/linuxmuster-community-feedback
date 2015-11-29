@@ -1,0 +1,5 @@
+debian/linuxmuster-community-feedback.*
+build-arch-stamp
+build-indep-stamp
+configure-stamp
+debian/linuxmuster-community-feedback/*

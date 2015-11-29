@@ -1,0 +1,27 @@
+Template: linuxmuster-community-feedback/sendstats
+Type: boolean
+Default: true
+Description: Sollen anonyme Statistiken an linuxmuster.net versandt werden? Sie koennen im Weiteren detailliert festlegen, welche Informationen uebermittelt werden. Wir bitten darum, produktive Systeme zaehlen zu lassen, dies hilft uns bei der Weitereltwicklung von linuxmuster.net.
+
+Template: linuxmuster-community-feedback/virtualized
+Type: select
+Choices: Keine, XenServer, VMWare ESXi, Virtualbox, Proxmox, KVM, Andere
+Default: Keine
+Description: Ist Ihre linuxmuster.net Umgebung virtualisiert? Wenn ja, mit welcher Virtualisierungssoftware?
+
+
+Template: linuxmuster-community-feedback/sendusers
+Type: boolean
+Default: true
+Description: Soll die Anzahl der Benutzer auf Ihrem System an linuxmuster.net uebermittelt werden?
+
+Template: linuxmuster-community-feedback/sendclients
+Type: boolean
+Default: true
+Description: Sollen Informationen ueber Anzahl und Typ der verwalteten Clietrechner an linuxmuster.net uebermittelt werden?
+
+Template: linuxmuster-community-feedback/sendlocation
+Type: boolean
+Default: true
+Description: Soll Ihre Installation auf der Nutzerkarte erscheinen? Sie muessen im Anschluss Ihre Geo-Koordinaten angeben.
+
