@@ -8,35 +8,70 @@
 # Source feedback config
 . /etc/linuxmuster/community-feedback.conf
 
+# if sendstats != true -> nothing to do exit
+if [ $SENDSTATS != "true" ]; then 
+	exit 0
+fi 
+
+
 # Source network settings
 . /var/lib/linuxmuster/network.settings
 
 # calculate system id from mac of eth0, schoolname an domainname
-MAC=$(ifconfig eth0 | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')
+MAC=$(ifconfig ${iface_lan} | grep -o -E '([[:xdigit:]]{1,2}:){5}[[:xdigit:]]{1,2}')
 STRINGTOHASH=${MAC}${schoolname}${domainname}
 SYSTEMID=$(echo -n $STRINGTOHASH | md5sum - | awk '{print $1}')
-
 # determine statsfile
 STATSFILE=/var/cache/linuxmuster/feedback-$SYSTEMID.txt
 
-# get linuxmuster.net version from /etc/issue
-ISSUEVERSION=$(cat /etc/issue | awk '{print $2}')
-# get version of linuxmuster-base
-BASEVERSION=$(dpkg -l linuxmuster-base | grep ^ii | awk '{print $3}')
+while getopts 'vu' OPT; do
+  case $OPT in
+    v)  showstats="true";;
+    u)  upload="true";;
+    *)  unknown="yes";;
+  esac
+done
 
-# output basic statsinformation
-echo "id=$SYSTEMID" > $STATSFILE
-echo "issueversion=$ISSUEVERSION" >> $STATSFILE
-echo "baseversion=$BASEVERSION" >> $STATSFILE
+function generate_stats_file {
 
-if [ $numusers -eq 1 ]; then
-    SCHUELERTXTUSERS=$(wc -l /etc/sophomorix/user/schueler.txt | awk '{print $1}')
-    LEHRERTXTUSERS=$(wc -l /etc/sophomorix/user/lehrer.txt | awk '{print $1}')
-    echo "students=$SCHUELERTXTUSERS" >> $STATSFILE
-    echo "teachers=$LEHRERTXTUSERS" >> $STATSFILE
+        # Include feedback Config
+	echo "##### Konfiguration #####" > $STATSFILE
+	cat /etc/linuxmuster/community-feedback.conf >> $STATSFILE     
+	echo "##### Statistiken   #####" >> $STATSFILE
+
+	# get linuxmuster.net version from /etc/issue
+	ISSUEVERSION=$(cat /etc/issue | awk '{print $2}')
+	# get version of linuxmuster-base
+	BASEVERSION=$(dpkg -l linuxmuster-base | grep ^ii | awk '{print $3}')
+
+	# output basic statsinformation
+	echo "id=$SYSTEMID" >> $STATSFILE
+	echo "issueversion=$ISSUEVERSION" >> $STATSFILE
+	echo "baseversion=$BASEVERSION" >> $STATSFILE
+
+	if [ $SENDUSERS = "true" ]; then
+	    SCHUELERTXTUSERS=$(grep -v "^#"  /etc/sophomorix/user/schueler.txt | wc -l | awk '{print $1}')
+	    LEHRERTXTUSERS=$(grep -v "^#" /etc/sophomorix/user/lehrer.txt | wc -l | awk '{print $1}')
+	    echo "students=$SCHUELERTXTUSERS" >> $STATSFILE
+	    echo "teachers=$LEHRERTXTUSERS" >> $STATSFILE
+	fi
+
+	if [ $SENDCLIENTS = "true" ]; then
+	    num=0
+	    num=$(grep -v  "^#"  /etc/linuxmuster/workstations | egrep ';(1|22);{0,1}$'  | wc -l)
+	    echo "linboclients=$num" >> $STATSFILE
+	    num=0
+	    num=$(grep -v "^#"  /etc/linuxmuster/workstations | egrep ';2;{0,1}$'  | wc -l)
+	    echo "opsiclients=$num" >> $STATSFILE
+	    num=0
+	    num=$(grep -v  "^#"  /etc/linuxmuster/workstations | egrep ';0;{0,1}$'  | wc -l)
+	    echo "ipclients=$num" >> $STATSFILE
+	fi
+	
+}
+
+generate_stats_file
+
+if [ $showstats = "true" ]; then 
+	cat $STATSFILE
 fi
-
-if [ $numclients -eq 1 ]; then
-    echo ""
-fi
-

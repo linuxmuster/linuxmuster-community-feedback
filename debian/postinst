@@ -1,43 +1,65 @@
 #!/bin/bash
 
-
-debug=1
-CONFIGFILE=/etc/linuxmuster/linuxmuster-community-feedback.conf
-
+debug=0
+CONFIGFILE=/etc/linuxmuster/community-feedback.conf
 
 # Source debconf library.
 . /usr/share/debconf/confmodule
 
 db_version 2.0
 
-# create config if not exists
-if [ ! -e $CONFIGFILE ]; then
-    echo "# Config file for my linuxmuster-community-feedback" > $CONFIGFILE
-    echo "SENDSTATS=" >> $CONFIGFILE
-    echo "SENDUSERS=" >> $CONFIGFILE
-    echo "SENDCLIENTS=" >> $CONFIGFILE
-    echo "SENDLOCATION=" >> $CONFIGFILE
-fi
 
 db_get linuxmuster-community-feedback/sendstats
 db_input high linuxmuster-community-feedback/sendstats || true
 db_go
+db_get linuxmuster-community-feedback/sendstats
 if [ "$RET" ]; then
     SENDSTATS=$RET;
-    
 fi
+
+if [ "$RET" = "true" ]; then 
 
 db_get linuxmuster-community-feedback/virtualized
 db_input high linuxmuster-community-feedback/virtualized || true
 db_go
+db_get linuxmuster-community-feedback/virtualized
 if [ "$RET" ]; then
     VIRTUALIZED=$RET;
 fi
 
 
+db_get linuxmuster-community-feedback/purpose
+db_input high linuxmuster-community-feedback/purpose || true
+db_go
+db_get linuxmuster-community-feedback/purpose
+if [ "$RET" ]; then
+    PURPOSE=$RET;
+fi
+
+
+db_get linuxmuster-community-feedback/bundesland
+db_input high linuxmuster-community-feedback/bundesland || true
+db_go
+db_get linuxmuster-community-feedback/bundesland
+if [ "$RET" ]; then
+    BUNDESLAND=$RET;
+fi
+
+if [ $BUNDESLAND = "Nicht in Deutschland" ]; then 
+	db_get linuxmuster-community-feedback/foreigncountry
+	db_input high linuxmuster-community-feedback/foreigncountry || true
+	db_go
+	db_get linuxmuster-community-feedback/foreigncountry
+	if [ "$RET" ]; then
+	    FOREIGNCOUNTRY=$RET;
+	fi
+
+fi
+
 db_get linuxmuster-community-feedback/sendusers
 db_input high linuxmuster-community-feedback/sendusers || true
 db_go
+db_get linuxmuster-community-feedback/sendusers
 if [ "$RET" ]; then
     SENDUSERS=$RET;
 fi
@@ -45,16 +67,59 @@ fi
 db_get linuxmuster-community-feedback/sendclients
 db_input high linuxmuster-community-feedback/sendclients || true
 db_go
+db_get linuxmuster-community-feedback/sendclients
 if [ "$RET" ]; then
     SENDCLIENTS=$RET;
 fi
 
+db_get linuxmuster-community-feedback/sendschoolname
+db_input high linuxmuster-community-feedback/sendschoolname || true
+db_go
+db_get linuxmuster-community-feedback/sendschoolname
+if [ "$RET" ]; then
+    SENDSCHOOLNAME=$RET;
+fi
+
+if [ "$SENDSCHOOLNAME" = true ]; then 
+	db_get linuxmuster-community-feedback/schoolname
+	db_input high linuxmuster-community-feedback/schoolname || true
+	db_go
+	db_get linuxmuster-community-feedback/schoolname
+	if [ "$RET" ]; then
+	    SCHOOLNAME=$RET;
+	fi
+fi
+
+
 db_get linuxmuster-community-feedback/sendlocation
 db_input high linuxmuster-community-feedback/sendlocation || true
 db_go
+db_get linuxmuster-community-feedback/sendlocation
 if [ "$RET" ]; then
     SENDLOCATION=$RET;
 fi
+
+if [ "$SENDLOCATION" = true ]; then 
+	db_get linuxmuster-community-feedback/plz
+	db_input high linuxmuster-community-feedback/plz || true
+	db_go
+	db_get linuxmuster-community-feedback/plz
+	if [ "$RET" ]; then
+	    PLZ=$RET;
+	fi
+
+	db_get linuxmuster-community-feedback/shownameinmap
+	db_input high linuxmuster-community-feedback/shownameinmap || true
+	db_go
+	db_get linuxmuster-community-feedback/shownameinmap
+	if [ "$RET" ]; then
+	    SHOWNAMEINMAP=$RET;
+	fi
+fi
+
+
+fi
+
 
 # new an deleted values to config
 test -z "$SENDSTATS" || grep -Eq '^ *SENDSTATS=' $CONFIGFILE || \
@@ -67,6 +132,40 @@ test -z "$SENDLOCATION" || grep -Eq '^ *SENDLOCATION=' $CONFIGFILE || \
             echo "SENDLOCATION=" >> $CONFIGFILE
 test -z "$VIRTUALIZED" || grep -Eq '^ *VIRTUALIZED=' $CONFIGFILE || \
             echo "VIRTUALIZED=" >> $CONFIGFILE
+test -z "$SENDSCHOOLNAME" || grep -Eq '^ *SENDSCHOOLNAME=' $CONFIGFILE || \
+            echo "SENDSCHOOLNAME=" >> $CONFIGFILE
+test -z "$BUNDESLAND" || grep -Eq '^ *BUNDESLAND=' $CONFIGFILE || \
+            echo "BUNDESLAND=" >> $CONFIGFILE
+test -z "$FOREIGNCOUNTRY" || grep -Eq '^ *FOREIGNCOUNTRY=' $CONFIGFILE || \
+            echo "FOREIGNCOUNTRY=" >> $CONFIGFILE
+test -z "$SCHOOLNAME" || grep -Eq '^ *SCHOOLNAME=' $CONFIGFILE || \
+            echo "SCHOOLNAME=" >> $CONFIGFILE
+test -z "$CONTACTMAIL" || grep -Eq '^ *CONTACTMAIL=' $CONFIGFILE || \
+            echo "CONTACTMAIL=" >> $CONFIGFILE
+test -z "$SHOWNAMEINMAP" || grep -Eq '^ *SHOWNAMEINMAP=' $CONFIGFILE || \
+            echo "SHOWNAMEINMAP=" >> $CONFIGFILE
+test -z "$PLZ" || grep -Eq '^ *PLZ=' $CONFIGFILE || \
+            echo "PLZ=" >> $CONFIGFILE
+test -z "$PURPOSE" || grep -Eq '^ *PURPOSE=' $CONFIGFILE || \
+            echo "PURPOSE=" >> $CONFIGFILE
+
+
+
+
+if [ $debug ]; then 
+ echo "SENDSTATS:   $SENDSTATS" 
+ echo "SENDUSERS:   $SENDUSERS"
+ echo "SENDCLIENTS: $SENDCLIENTS"
+ echo "SENDLOCATION:$SENDLOCATION" 
+ echo "BUNDESLAND:$BUNDESLAND" 
+ echo "FOREIGNCOUNTRY:$FOREIGNCOUNTRY" 
+ echo "PLZ: $PLZ"
+ echo "SENDSCHOOLNAME: $SENDSCHOOLNAME"
+ echo "SCHOOLNAME: $SCHOOLNAME"
+ echo "SHOWNAMEINMAP: $SHOWNAMEINMAP"
+ echo "PURPOSE: $PURPOSE"
+fi
+
 
 # write config
 cp -a -f $CONFIGFILE $CONFIGFILE.tmp
@@ -74,11 +173,16 @@ sed -e "s/^ *SENDSTATS=.*/SENDSTATS=\"$SENDSTATS\"/" \
     -e "s/^ *SENDUSERS=.*/SENDUSERS=\"$SENDUSERS\"/" \
     -e "s/^ *SENDCLIENTS=.*/SENDCLIENTS=\"$SENDCLIENTS\"/" \
     -e "s/^ *SENDLOCATION=.*/SENDLOCATION=\"$SENDLOCATION\"/" \
+    -e "s/^ *PLZ=.*/PLZ=\"$PLZ\"/" \
     -e "s/^ *VIRTUALIZED=.*/VIRTUALIZED=\"$VIRTUALIZED\"/" \
+    -e "s/^ *SENDSCHOOLNAME=.*/SENDSCHOOLNAME=\"$SENDSCHOOLNAME\"/" \
+    -e "s/^ *SCHOOLNAME=.*/SCHOOLNAME=\"$SCHOOLNAME\"/" \
+    -e "s/^ *SHOWNAMEINMAP=.*/SHOWNAMEINMAP=\"$SHOWNAMEINMAP\"/" \
+    -e "s/^ *BUNDESLAND=.*/BUNDESLAND=\"$BUNDESLAND\"/" \
+    -e "s/^ *FOREIGNCOUNTRY=.*/FOREIGNCOUNTRY=\"$FOREIGNCOUNTRY\"/" \
+    -e "s/^ *PURPOSE=.*/PURPOSE=\"$PURPOSE\"/" \
     < $CONFIGFILE > $CONFIGFILE.tmp
 mv -f $CONFIGFILE.tmp $CONFIGFILE
-
-# dh_installdeb will replace this with shell code automatically
 
 # dh_installdeb will replace this with shell code automatically
 # generated by other debhelper scripts.

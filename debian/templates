@@ -1,27 +1,63 @@
 Template: linuxmuster-community-feedback/sendstats
 Type: boolean
 Default: true
-Description: Sollen anonyme Statistiken an linuxmuster.net versandt werden? Sie koennen im Weiteren detailliert festlegen, welche Informationen uebermittelt werden. Wir bitten darum, produktive Systeme zaehlen zu lassen, dies hilft uns bei der Weitereltwicklung von linuxmuster.net.
+Description: Sollen anonyme Statistiken an linuxmuster.net versandt werden? Sie koennen anschliessend detailliert festlegen, welche Informationen uebermittelt werden. Wir bitten darum, produktive Systeme zaehlen zu lassen, dies hilft uns bei der Weiterentwicklung von linuxmuster.net.
 
 Template: linuxmuster-community-feedback/virtualized
 Type: select
-Choices: Keine, XenServer, VMWare ESXi, Virtualbox, Proxmox, KVM, Andere
+Choices: Nicht virtualisiert, XenServer, VMWare ESXi, Virtualbox, Proxmox, KVM, Andere
 Default: Keine
 Description: Ist Ihre linuxmuster.net Umgebung virtualisiert? Wenn ja, mit welcher Virtualisierungssoftware?
 
+Template: linuxmuster-community-feedback/bundesland
+Type: select
+Choices: Nicht in Deutschland, Baden-Wuerttemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thueringen
+Default: Baden-Wuerttemberg
+Description: Wenn Sie linuxmuster.net in Deutschland einsetzen - in welchem Bundesland befindet sich der Einsatzort.
 
 Template: linuxmuster-community-feedback/sendusers
 Type: boolean
 Default: true
-Description: Soll die Anzahl der Benutzer auf Ihrem System an linuxmuster.net uebermittelt werden?
+Description: Darf die Anzahl der Benutzer auf Ihrem System an linuxmuster.net uebermittelt werden? Dabei werden keinerlei personenbezogene Informationen uebermittelt, lediglich die Anzahl der Benutzer (Schueler/Lehrer).
 
 Template: linuxmuster-community-feedback/sendclients
 Type: boolean
 Default: true
-Description: Sollen Informationen ueber Anzahl und Typ der verwalteten Clietrechner an linuxmuster.net uebermittelt werden?
+Description: Duerfen Informationen ueber Anzahl und Typ (LINBO verwaltet oder nicht) der verwalteten Clientrechner an linuxmuster.net uebermittelt werden? 
 
 Template: linuxmuster-community-feedback/sendlocation
 Type: boolean
 Default: true
-Description: Soll Ihre Installation auf der Nutzerkarte erscheinen? Sie muessen im Anschluss Ihre Geo-Koordinaten angeben.
+Description: Darf Ihre Installation auf der Nutzerkarte erscheinen? Wenn ja, muessen Sie im Anschluss Ihre Postleitzahl angeben.
+
+Template: linuxmuster-community-feedback/shownameinmap
+Type: boolean
+Default: true
+Description: Darf der Name der Schule/Institution am Pin auf der Benutzerkarte angezeigt werden?
+
+Template: linuxmuster-community-feedback/plz
+Type: string
+Default: 
+Description: Geben Sie bitte Ihre Postleitzahl ein.
+
+Template: linuxmuster-community-feedback/foreigncountry
+Type: string
+Default: 
+Description: In welchem Land setzen Sie linuxmuster.net ein?
+
+Template: linuxmuster-community-feedback/purpose
+Type: select
+Choices: Keine Angabe, Schulnetz, Verwaltungsnetz, Soziale Einrichtung, Testsystem, Andere
+Default: Keine
+Description: Fuer welchen Zweck setzen Sie linuxmuster.net ein?
+
+Template: linuxmuster-community-feedback/sendschoolname
+Type: boolean
+Default: false
+Description: Wollen Sie, dass der Name der Instition/Schule an linuxmuster.net uebermittelt wird?  
+
+Template: linuxmuster-community-feedback/schoolname
+Type: string
+Default: 
+Description: Geben Sie den Namen Ihrer Institution/Schule an.
 
