@@ -24,6 +24,9 @@ SYSTEMID=$(echo -n $STRINGTOHASH | md5sum - | awk '{print $1}')
 # determine statsfile
 STATSFILE=/var/cache/linuxmuster/feedback-$SYSTEMID.txt
 
+showstats="false"
+upload="false"
+
 while getopts 'vu' OPT; do
   case $OPT in
     v)  showstats="true";;
@@ -75,3 +78,9 @@ generate_stats_file
 if [ $showstats = "true" ]; then 
 	cat $STATSFILE
 fi
+
+if [ $upload = "true" ]; then 
+     curl -k -F filedata=@$STATSFILE https://www.linuxmuster.net/stats/u.php
+fi
+
+
