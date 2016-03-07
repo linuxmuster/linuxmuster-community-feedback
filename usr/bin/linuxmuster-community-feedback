@@ -25,12 +25,16 @@ SYSTEMID=$(echo -n $STRINGTOHASH | md5sum - | awk '{print $1}')
 STATSFILE=/var/cache/linuxmuster/feedback-$SYSTEMID.txt
 
 showstats="false"
+showhelp="false"
+showstatus="false"
 upload="false"
 
-while getopts 'vu' OPT; do
+while getopts 'vush' OPT; do
   case $OPT in
     v)  showstats="true";;
+    s)  showstatus="true";;
     u)  upload="true";;
+    h)  showhelp="true";;
     *)  unknown="yes";;
   esac
 done
@@ -46,11 +50,23 @@ function generate_stats_file {
 	ISSUEVERSION=$(cat /etc/issue | awk '{print $2}')
 	# get version of linuxmuster-base
 	BASEVERSION=$(dpkg -l linuxmuster-base | grep ^ii | awk '{print $3}')
+	# get version of linuxmuster-linbo
+	LINBOVERSION=$(dpkg -l linuxmuster-linbo | grep ^ii | awk '{print $3}')
+	# get version of linuxmuster-schulkonsole
+	SCHUKOVERSION=$(dpkg -l linuxmuster-schulkonsole | grep ^ii | awk '{print $3}')
+	# get version of sophomorix
+	SOPHOMORIXVERSION=$(dpkg -l sophomorix2 | grep ^ii | awk '{print $3}')
+        # Subnetting from networ settings
+        SUBNETTING=$subnetting
 
 	# output basic statsinformation
 	echo "id=$SYSTEMID" >> $STATSFILE
 	echo "issueversion=$ISSUEVERSION" >> $STATSFILE
 	echo "baseversion=$BASEVERSION" >> $STATSFILE
+	echo "linboversion=$LINBOVERSION" >> $STATSFILE
+	echo "schukoversion=$SCHUKOVERSION" >> $STATSFILE
+	echo "sophomorixversion=$SOPHOMORIXVERSION" >> $STATSFILE
+	echo "subnetting=$SUBNETTING" >> $STATSFILE
 
 	if [ $SENDUSERS = "true" ]; then
 	    SCHUELERTXTUSERS=$(grep -v "^#"  /etc/sophomorix/user/schueler.txt | wc -l | awk '{print $1}')
@@ -61,26 +77,70 @@ function generate_stats_file {
 
 	if [ $SENDCLIENTS = "true" ]; then
 	    num=0
-	    num=$(grep -v  "^#"  /etc/linuxmuster/workstations | egrep ';(1|22);{0,1}$'  | wc -l)
-	    echo "linboclients=$num" >> $STATSFILE
+	    num=$(grep -v "^#" /etc/linuxmuster/workstations | cut -d";" -f 11 | sed 's/\s//g' |  egrep -c "(^1$|^22$)")
+	    echo "linbo-clients=$num" >> $STATSFILE
 	    num=0
-	    num=$(grep -v "^#"  /etc/linuxmuster/workstations | egrep ';2;{0,1}$'  | wc -l)
-	    echo "opsiclients=$num" >> $STATSFILE
+	    num=$(grep -v "^#" /etc/linuxmuster/workstations | cut -d";" -f 11 | sed 's/\s//g' |  egrep -c "(^2$)")
+	    echo "linbo+opsi-clients=$num" >> $STATSFILE
 	    num=0
-	    num=$(grep -v  "^#"  /etc/linuxmuster/workstations | egrep ';0;{0,1}$'  | wc -l)
-	    echo "ipclients=$num" >> $STATSFILE
+	    num=$(grep -v "^#" /etc/linuxmuster/workstations | cut -d";" -f 11 | sed 's/\s//g' |  egrep -c "(^3$)")
+	    echo "opsi-clients=$num" >> $STATSFILE
+	    num=0
+	    num=$(grep -v "^#" /etc/linuxmuster/workstations | cut -d";" -f 11 | sed 's/\s//g' |  egrep -c "(^0$)")
+	    echo "ip-clients=$num" >> $STATSFILE
 	fi
 	
 }
 
 generate_stats_file
 
-if [ $showstats = "true" ]; then 
-	cat $STATSFILE
+if [ $showhelp = "true" ]; then
+	echo "Usage: $0 [-v] [-u] [-s] [-h]"
+	echo 
+	echo "   -v : Show stats file"
+	echo "   -u : Upload stats to linuxmuster.net server"
+	echo "   -s : Show cronjob status"
+	echo "   -h : Print this help and exit"
+	exit 0
 fi
 
+if [ $showstats = "true" ]; then 
+        echo "Statusfile:"
+	echo "  $STATSFILE" 
+	echo "mit folgenden Informationen:"
+	echo "--------------------------------"
+	echo 
+	cat $STATSFILE
+	echo 
+	echo "--------------------------------"
+fi
+
+if [ $showstatus = "true" ]; then
+	if [ -f /etc/cron.d/linuxmuster-community-feedback ]; then 
+		echo "Cronjob enabled in file:"
+		echo "  /etc/cron.d/linuxmuster-community-feedback"
+		echo "--------------------------------"
+		echo 
+		cat /etc/cron.d/linuxmuster-community-feedback
+		echo 
+		echo "--------------------------------"
+        else
+		echo "No cronjob installes by package!"
+	fi
+fi 
+
 if [ $upload = "true" ]; then 
-     curl -k -F filedata=@$STATSFILE https://www.linuxmuster.net/stats/u.php
+
+     # Check if in BelWue "Verwaltungsnetz in BW
+     targetip=$(dig www.linuxmuster.net | grep -v "^;" | grep linuxmuster | cut -f 5)
+     # wenn keine IP zurueckkommt, testen ob der belwue proxy da ist, wenn ja
+     # proxy einstellungen setzen
+     CURLOPTS=""
+     if [ "x$targetip" = "x" ]; then
+        curl  --connect-timeout 5 http://129.143.4.2:8080 > /dev/null 2>&1 && CURLOPTS=" -x 129.143.4.2:8080 "
+     fi
+
+     curl $CURLOPTS -k -F filedata=@$STATSFILE https://www.linuxmuster.net/stats/u.php
 fi
 
 

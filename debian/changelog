@@ -1,6 +1,54 @@
-linuxmuster-community-feedback (0.3) unstable; urgency=low
+linuxmuster-community-feedback (0.9.7) babo; urgency=low
 
-  * Viel geaemdert
+  * Neuer Versuch zur korrekten Ermittlung der Hostzahlen
+  * Info zum subnetting hinzugefuegt
+
+ -- Frank Schiebel <frank@linuxmuster.net>  Mon, 07 Mar 2016 08:16:47 +0100
+
+linuxmuster-community-feedback (0.9.5) babo; urgency=low
+
+  * Debug Anweisungen aus postinst entfernt
+  * Reihenfolge geaendert: Zuerst den Zweck, dann den Rest
+  * Formulierungen angepasst
+  * Clear screen bei Konfigurationsaenderungen
+  * Abhaengigkeit fuer curl
+  * Check, ob im Verwaltungsnetz in BW der BelWue Proxy noetig ist
+  * Paketbeschreibung angepasst
+  * Paketsektion gefixt
+
+ -- Frank Schiebel <frank@linuxmuster.net>  Sun, 06 Mar 2016 14:51:12 +0100
+
+linuxmuster-community-feedback (0.9.2) babo; urgency=low
+
+  * Abfrage Dienstleister 
+  * Name in Karte wird nur abgefragt, wenn der Name uebermittelt wird
+  * Fixed Bugs: Schulname, Auslandsabfrage
+  * Versionen von linbo, sophomorix und Schulkonsole
+  * Kommandozeilenoptionen
+  * Erstes Release
+
+ -- Frank Schiebel <frank@linuxmuster.net>  Sat, 05 Mar 2016 18:28:38 +0100
+
+linuxmuster-community-feedback (0.9) babo; urgency=low
+
+  * Fehler in cronjob behoben 
+
+ -- Frank Schiebel <frank@linuxmuster.net>  Sun, 28 Feb 2016 11:43:38 +0100
+
+linuxmuster-community-feedback (0.8) babo; urgency=low
+
+  * Ermittlung der Hostzahlen verfeinert
+  * Unterscheidung linbo, lino+opsi, opsi ip-Clients
+
+ -- Frank Schiebel <frank@linuxmuster.net>  Sat, 27 Feb 2016 23:35:05 +0100
+
+linuxmuster-community-feedback (0.7) babo; urgency=low
+
+  * Vieles geaendert
+  * Erste Testversion
+  * Cronjob angefuegt
+  * Konfigurationstemplate geloescht
+  * Aenderung Hostzaehlung
 
  -- Frank Schiebel <frank@linuxmuster.net>  Thu, 27 Feb 2016 17:44:00 +0100
 

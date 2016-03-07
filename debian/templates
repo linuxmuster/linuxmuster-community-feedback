@@ -1,7 +1,7 @@
 Template: linuxmuster-community-feedback/sendstats
 Type: boolean
 Default: true
-Description: Sollen anonyme Statistiken an linuxmuster.net versandt werden? Sie koennen anschliessend detailliert festlegen, welche Informationen uebermittelt werden. Wir bitten darum, produktive Systeme zaehlen zu lassen, dies hilft uns bei der Weiterentwicklung von linuxmuster.net.
+Description: Sollen anonyme Statistiken an linuxmuster.net versandt werden? Sie koennen anschliessend detailliert festlegen, welche Informationen uebermittelt werden. Wir bitten darum, Ihr System zaehlen zu lassen, dies hilft uns bei der Weiterentwicklung von linuxmuster.net.
 
 Template: linuxmuster-community-feedback/virtualized
 Type: select
@@ -14,6 +14,13 @@ Type: select
 Choices: Nicht in Deutschland, Baden-Wuerttemberg, Bayern, Berlin, Brandenburg, Bremen, Hamburg, Hessen, Mecklenburg-Vorpommern, Niedersachsen, Nordrhein-Westfalen, Rheinland-Pfalz, Saarland, Sachsen, Sachsen-Anhalt, Schleswig-Holstein, Thueringen
 Default: Baden-Wuerttemberg
 Description: Wenn Sie linuxmuster.net in Deutschland einsetzen - in welchem Bundesland befindet sich der Einsatzort.
+
+Template: linuxmuster-community-feedback/itsupport
+Type: select
+Choices: Regelmaessig - z.B. mit Wartungsvertrag, Gelegentlich - z.B bei groesseren Aenderungen, Nein - kein Dienstleister, Trifft nicht zu - Testsystem o.ae.
+Default: 
+Description: Wird Ihr Netzwerk von einem Dienstleister betreut? 
+
 
 Template: linuxmuster-community-feedback/sendusers
 Type: boolean
@@ -49,7 +56,7 @@ Template: linuxmuster-community-feedback/purpose
 Type: select
 Choices: Keine Angabe, Schulnetz, Verwaltungsnetz, Soziale Einrichtung, Testsystem, Andere
 Default: Keine
-Description: Fuer welchen Zweck setzen Sie linuxmuster.net ein?
+Description: Fuer welchen Zweck setzen Sie diese Installation von linuxmuster.net ein?
 
 Template: linuxmuster-community-feedback/sendschoolname
 Type: boolean

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-debug=0
 CONFIGFILE=/etc/linuxmuster/community-feedback.conf
+
+if [ ! -f $CONFIGFILE ]; then 
+	touch $CONFIGFILE
+fi
+
+confstat1=$(md5sum /etc/linuxmuster/community-feedback.conf | cut -d" " -f1)
 
 # Source debconf library.
 . /usr/share/debconf/confmodule
@@ -19,6 +24,15 @@ fi
 
 if [ "$RET" = "true" ]; then 
 
+db_get linuxmuster-community-feedback/purpose
+db_input high linuxmuster-community-feedback/purpose || true
+db_go
+db_get linuxmuster-community-feedback/purpose
+if [ "$RET" ]; then
+    PURPOSE=$RET;
+fi
+
+
 db_get linuxmuster-community-feedback/virtualized
 db_input high linuxmuster-community-feedback/virtualized || true
 db_go
@@ -27,13 +41,12 @@ if [ "$RET" ]; then
     VIRTUALIZED=$RET;
 fi
 
-
-db_get linuxmuster-community-feedback/purpose
-db_input high linuxmuster-community-feedback/purpose || true
+db_get linuxmuster-community-feedback/itsupport
+db_input high linuxmuster-community-feedback/itsupport || true
 db_go
-db_get linuxmuster-community-feedback/purpose
+db_get linuxmuster-community-feedback/itsupport
 if [ "$RET" ]; then
-    PURPOSE=$RET;
+    ITSUPPORT=$RET;
 fi
 
 
@@ -45,7 +58,7 @@ if [ "$RET" ]; then
     BUNDESLAND=$RET;
 fi
 
-if [ $BUNDESLAND = "Nicht in Deutschland" ]; then 
+if [ "$BUNDESLAND" = "Nicht in Deutschland" ]; then 
 	db_get linuxmuster-community-feedback/foreigncountry
 	db_input high linuxmuster-community-feedback/foreigncountry || true
 	db_go
@@ -107,13 +120,14 @@ if [ "$SENDLOCATION" = true ]; then
 	if [ "$RET" ]; then
 	    PLZ=$RET;
 	fi
-
-	db_get linuxmuster-community-feedback/shownameinmap
-	db_input high linuxmuster-community-feedback/shownameinmap || true
-	db_go
-	db_get linuxmuster-community-feedback/shownameinmap
-	if [ "$RET" ]; then
-	    SHOWNAMEINMAP=$RET;
+	if [  "x$SCHOOLNAME" != "x" ]; then 
+		db_get linuxmuster-community-feedback/shownameinmap
+		db_input high linuxmuster-community-feedback/shownameinmap || true
+		db_go
+		db_get linuxmuster-community-feedback/shownameinmap
+		if [ "$RET" ]; then
+		    SHOWNAMEINMAP=$RET;
+		fi
 	fi
 fi
 
@@ -132,6 +146,8 @@ test -z "$SENDLOCATION" || grep -Eq '^ *SENDLOCATION=' $CONFIGFILE || \
             echo "SENDLOCATION=" >> $CONFIGFILE
 test -z "$VIRTUALIZED" || grep -Eq '^ *VIRTUALIZED=' $CONFIGFILE || \
             echo "VIRTUALIZED=" >> $CONFIGFILE
+test -z "$ITSUPPORT" || grep -Eq '^ *ITSUPPORT=' $CONFIGFILE || \
+            echo "ITSUPPORT=" >> $CONFIGFILE
 test -z "$SENDSCHOOLNAME" || grep -Eq '^ *SENDSCHOOLNAME=' $CONFIGFILE || \
             echo "SENDSCHOOLNAME=" >> $CONFIGFILE
 test -z "$BUNDESLAND" || grep -Eq '^ *BUNDESLAND=' $CONFIGFILE || \
@@ -149,24 +165,6 @@ test -z "$PLZ" || grep -Eq '^ *PLZ=' $CONFIGFILE || \
 test -z "$PURPOSE" || grep -Eq '^ *PURPOSE=' $CONFIGFILE || \
             echo "PURPOSE=" >> $CONFIGFILE
 
-
-
-
-if [ $debug ]; then 
- echo "SENDSTATS:   $SENDSTATS" 
- echo "SENDUSERS:   $SENDUSERS"
- echo "SENDCLIENTS: $SENDCLIENTS"
- echo "SENDLOCATION:$SENDLOCATION" 
- echo "BUNDESLAND:$BUNDESLAND" 
- echo "FOREIGNCOUNTRY:$FOREIGNCOUNTRY" 
- echo "PLZ: $PLZ"
- echo "SENDSCHOOLNAME: $SENDSCHOOLNAME"
- echo "SCHOOLNAME: $SCHOOLNAME"
- echo "SHOWNAMEINMAP: $SHOWNAMEINMAP"
- echo "PURPOSE: $PURPOSE"
-fi
-
-
 # write config
 cp -a -f $CONFIGFILE $CONFIGFILE.tmp
 sed -e "s/^ *SENDSTATS=.*/SENDSTATS=\"$SENDSTATS\"/" \
@@ -175,6 +173,7 @@ sed -e "s/^ *SENDSTATS=.*/SENDSTATS=\"$SENDSTATS\"/" \
     -e "s/^ *SENDLOCATION=.*/SENDLOCATION=\"$SENDLOCATION\"/" \
     -e "s/^ *PLZ=.*/PLZ=\"$PLZ\"/" \
     -e "s/^ *VIRTUALIZED=.*/VIRTUALIZED=\"$VIRTUALIZED\"/" \
+    -e "s/^ *ITSUPPORT=.*/ITSUPPORT=\"$ITSUPPORT\"/" \
     -e "s/^ *SENDSCHOOLNAME=.*/SENDSCHOOLNAME=\"$SENDSCHOOLNAME\"/" \
     -e "s/^ *SCHOOLNAME=.*/SCHOOLNAME=\"$SCHOOLNAME\"/" \
     -e "s/^ *SHOWNAMEINMAP=.*/SHOWNAMEINMAP=\"$SHOWNAMEINMAP\"/" \
@@ -190,5 +189,26 @@ mv -f $CONFIGFILE.tmp $CONFIGFILE
 #DEBHELPER#
 
 db_stop
+
+# Cronjob anlegen...
+rm -f /etc/cron.d/linuxmuster-community-feedback
+if [ $SENDSTATS = "true" ]; then 
+	minute=$(( $RANDOM % 59 ))
+	day=$(($(( $RANDOM % 2 )) * 6))
+	echo "# Diese Datei wird automatisch erstellt."  > /etc/cron.d/linuxmuster-community-feedback
+	echo "# Manuelle Aenderungen werden ueberschrieben!"  >> /etc/cron.d/linuxmuster-community-feedback
+	echo "$minute 4 * * $day   root /usr/bin/linuxmuster-community-feedback -u > /dev/null 2>&1" >> /etc/cron.d/linuxmuster-community-feedback
+fi 
+
+confstat2=$(md5sum /etc/linuxmuster/community-feedback.conf | cut -d" " -f1)
+
+if [ $SENDSTATS = "true" -a "$confstat2" != "$confstat1" ]; then 
+	message=$(/usr/bin/linuxmuster-community-feedback -v)
+	dialog --title "Darf ich folgende Daten aktuell halten und senden?" --scrollbar --msgbox "$message" 0 0 
+	/usr/bin/linuxmuster-community-feedback -u > /dev/null 2>&1
+	clear
+fi
+
+
 
 exit 0

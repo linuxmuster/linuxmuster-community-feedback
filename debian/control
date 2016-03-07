@@ -8,5 +8,5 @@ Homepage: <insert the upstream URL, if relevant>
 
 Package: linuxmuster-community-feedback
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Empty package as base for new ideas
+Depends: ${shlibs:Depends}, ${misc:Depends}, curl
+Description: Collecting an sending statistics to the linuxmuster.net project
